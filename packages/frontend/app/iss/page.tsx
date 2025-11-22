@@ -30,8 +30,16 @@ export default function ISSPage() {
         const posRes = await fetch('http://localhost:3001/api/iss/position')
         const posData = await posRes.json()
 
-        if (posData.success) {
-          setPosition(posData.data)
+        if (posData.success && posData.data.iss_position) {
+          // Extract ISS position from nested structure and add timestamp/altitude/velocity
+          const issPos = posData.data.iss_position
+          setPosition({
+            latitude: parseFloat(issPos.latitude),
+            longitude: parseFloat(issPos.longitude),
+            altitude: 408, // ISS orbits at ~408 km
+            velocity: 7.66, // ISS travels at ~7.66 km/s
+            timestamp: posData.data.timestamp
+          })
         }
 
         // Fetch astronauts

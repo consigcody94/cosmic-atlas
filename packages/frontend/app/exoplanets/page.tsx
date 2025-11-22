@@ -26,7 +26,11 @@ export default function ExoplanetsPage() {
     const fetchData = async () => {
       try {
         const [planetsRes, statsRes] = await Promise.all([
-          fetch('http://localhost:3001/api/exoplanets/search?limit=50'),
+          fetch('http://localhost:3001/api/exoplanets/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ limit: 50 })
+          }),
           fetch('http://localhost:3001/api/exoplanets/stats/summary')
         ])
 

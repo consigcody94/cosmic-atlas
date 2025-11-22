@@ -97,34 +97,91 @@ export class NASAClient extends APIClient {
    * Get sample Mars rover photos for when API is unavailable
    */
   private getSampleMarsPhotos(rover: string): any[] {
-    const basePhotos = [
-      {
-        id: 1,
-        sol: 1000,
-        camera: { id: 20, name: 'FHAZ', rover_id: 5, full_name: 'Front Hazard Avoidance Camera' },
-        img_src: 'https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/fcam/FLB_486265257EDR_F0481570FHAZ00323M_.JPG',
-        earth_date: '2015-05-30',
-        rover: { id: 5, name: rover, status: 'active' },
-      },
-      {
-        id: 2,
-        sol: 1000,
-        camera: { id: 21, name: 'RHAZ', rover_id: 5, full_name: 'Rear Hazard Avoidance Camera' },
-        img_src: 'https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/rcam/RLB_486265291EDR_F0481570RHAZ00323M_.JPG',
-        earth_date: '2015-05-30',
-        rover: { id: 5, name: rover, status: 'active' },
-      },
-      {
-        id: 3,
-        sol: 1000,
-        camera: { id: 22, name: 'MAST', rover_id: 5, full_name: 'Mast Camera' },
-        img_src: 'https://mars.nasa.gov/msl-raw-images/msss/01000/mcam/1000MR0044631300503690E01_DXXX.jpg',
-        earth_date: '2015-05-30',
-        rover: { id: 5, name: rover, status: 'active' },
-      },
-    ];
+    const roverPhotos: Record<string, any[]> = {
+      curiosity: [
+        {
+          id: 1, sol: 1000, earth_date: '2015-05-30',
+          camera: { name: 'FHAZ', full_name: 'Front Hazard Avoidance Camera' },
+          img_src: 'https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/fcam/FLB_486265257EDR_F0481570FHAZ00323M_.JPG',
+          rover: { name: 'Curiosity' },
+        },
+        {
+          id: 2, sol: 1000, earth_date: '2015-05-30',
+          camera: { name: 'MAST', full_name: 'Mast Camera' },
+          img_src: 'https://mars.nasa.gov/msl-raw-images/msss/01000/mcam/1000MR0044631300503690E01_DXXX.jpg',
+          rover: { name: 'Curiosity' },
+        },
+        {
+          id: 3, sol: 1000, earth_date: '2015-05-30',
+          camera: { name: 'NAVCAM', full_name: 'Navigation Camera' },
+          img_src: 'https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/01000/opgs/edr/ncam/NLB_486265434EDR_F0481570NCAM00353M_.JPG',
+          rover: { name: 'Curiosity' },
+        },
+      ],
+      perseverance: [
+        {
+          id: 4, sol: 100, earth_date: '2021-06-08',
+          camera: { name: 'FRONT_HAZCAM_LEFT', full_name: 'Front Hazard Avoidance Camera - Left' },
+          img_src: 'https://mars.nasa.gov/mars2020-raw-images/pub/ods/surface/sol/00100/ids/edr/browse/fcam/FLF_0100_0673152350_978ECM_N0060000FHAZ00900_01_295J01.jpg',
+          rover: { name: 'Perseverance' },
+        },
+        {
+          id: 5, sol: 100, earth_date: '2021-06-08',
+          camera: { name: 'NAVCAM_LEFT', full_name: 'Navigation Camera - Left' },
+          img_src: 'https://mars.nasa.gov/mars2020-raw-images/pub/ods/surface/sol/00100/ids/edr/browse/ncam/NLF_0100_0673158398_650ECM_N0060000NCAM00900_01_295J01.jpg',
+          rover: { name: 'Perseverance' },
+        },
+        {
+          id: 6, sol: 100, earth_date: '2021-06-08',
+          camera: { name: 'MCZ_RIGHT', full_name: 'Mast Camera Zoom - Right' },
+          img_src: 'https://mars.nasa.gov/mars2020-raw-images/pub/ods/surface/sol/00100/ids/edr/browse/zcam/ZR0_0100_0673145298_874ECM_N0060000ZCAM03100_1100LMJ01.jpg',
+          rover: { name: 'Perseverance' },
+        },
+      ],
+      opportunity: [
+        {
+          id: 7, sol: 1000, earth_date: '2006-11-23',
+          camera: { name: 'PANCAM', full_name: 'Panoramic Camera' },
+          img_src: 'https://mars.nasa.gov/mer/gallery/all/1/p/1000/1P215400728EFFAJQIP2285L2M1-BR.JPG',
+          rover: { name: 'Opportunity' },
+        },
+        {
+          id: 8, sol: 1000, earth_date: '2006-11-23',
+          camera: { name: 'NAVCAM', full_name: 'Navigation Camera' },
+          img_src: 'https://mars.nasa.gov/mer/gallery/all/1/n/1000/1N215401031EFFAJQIP1950L0M1-BR.JPG',
+          rover: { name: 'Opportunity' },
+        },
+        {
+          id: 9, sol: 1000, earth_date: '2006-11-23',
+          camera: { name: 'FHAZ', full_name: 'Front Hazard Avoidance Camera' },
+          img_src: 'https://mars.nasa.gov/mer/gallery/all/1/f/1000/1F215401255EFFAJQIP1214L0M1-BR.JPG',
+          rover: { name: 'Opportunity' },
+        },
+      ],
+      spirit: [
+        {
+          id: 10, sol: 1000, earth_date: '2006-11-04',
+          camera: { name: 'PANCAM', full_name: 'Panoramic Camera' },
+          img_src: 'https://mars.nasa.gov/mer/gallery/all/2/p/1000/2P216261634EFFAOM9P2600L2M1-BR.JPG',
+          rover: { name: 'Spirit' },
+        },
+        {
+          id: 11, sol: 1000, earth_date: '2006-11-04',
+          camera: { name: 'NAVCAM', full_name: 'Navigation Camera' },
+          img_src: 'https://mars.nasa.gov/mer/gallery/all/2/n/1000/2N216262145EFFAOM9P1903L0M1-BR.JPG',
+          rover: { name: 'Spirit' },
+        },
+        {
+          id: 12, sol: 1000, earth_date: '2006-11-04',
+          camera: { name: 'FHAZ', full_name: 'Front Hazard Avoidance Camera' },
+          img_src: 'https://mars.nasa.gov/mer/gallery/all/2/f/1000/2F216262286EFFAOM9P1214L0M1-BR.JPG',
+          rover: { name: 'Spirit' },
+        },
+      ],
+    };
 
-    return basePhotos;
+    const roverKey = rover.toLowerCase();
+    return roverPhotos[roverKey] || roverPhotos.curiosity;
   }
 
   /**
