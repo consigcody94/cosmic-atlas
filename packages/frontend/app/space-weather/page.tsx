@@ -2,30 +2,41 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Wind, Activity, AlertTriangle } from 'lucide-react'
+import { Sun, Wind, Activity, AlertTriangle, Zap, Radio } from 'lucide-react'
 
 export default function SpaceWeatherPage() {
   const [aurora, setAurora] = useState<any>(null)
   const [solarWind, setSolarWind] = useState<any>(null)
   const [geomagnetic, setGeomagnetic] = useState<any>(null)
+  const [solarFlares, setSolarFlares] = useState<any[]>([])
+  const [cmes, setCmes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [auroraRes, solarRes, geoRes] = await Promise.all([
+        const today = new Date().toISOString().split('T')[0]
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+        const [auroraRes, solarRes, geoRes, flaresRes, cmesRes] = await Promise.all([
           fetch('http://localhost:3001/api/space-weather/aurora'),
           fetch('http://localhost:3001/api/space-weather/solar-wind'),
-          fetch('http://localhost:3001/api/space-weather/geomagnetic')
+          fetch('http://localhost:3001/api/space-weather/geomagnetic'),
+          fetch(`http://localhost:3001/api/space-weather/solar-flares?start_date=${weekAgo}&end_date=${today}`),
+          fetch(`http://localhost:3001/api/space-weather/cmes?start_date=${weekAgo}&end_date=${today}`)
         ])
 
         const auroraData = await auroraRes.json()
         const solarData = await solarRes.json()
         const geoData = await geoRes.json()
+        const flaresData = await flaresRes.json()
+        const cmesData = await cmesRes.json()
 
         if (auroraData.success) setAurora(auroraData.data)
         if (solarData.success) setSolarWind(solarData.data)
         if (geoData.success) setGeomagnetic(geoData.data)
+        if (flaresData.success) setSolarFlares(flaresData.data.slice(0, 5))
+        if (cmesData.success) setCmes(cmesData.data.slice(0, 5))
 
         setLoading(false)
       } catch (err) {
@@ -183,25 +194,104 @@ export default function SpaceWeatherPage() {
           </motion.div>
         </div>
 
-        {/* Solar Flares */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-card rounded-2xl p-8 mt-8"
-        >
-          <div className="flex items-center space-x-3 mb-6">
-            <Sun className="w-8 h-8 text-yellow-400" />
-            <h2 className="text-2xl font-bold text-white">Recent Solar Activity</h2>
-          </div>
-
-          <div className="aspect-video bg-gradient-to-br from-yellow-900/20 to-orange-900/20 rounded-xl flex items-center justify-center">
-            <div className="text-center">
-              <Sun className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-              <p className="text-gray-400">Solar flare and CME data coming soon</p>
+        {/* Solar Flares & CMEs */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          {/* Solar Flares */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="glass-card rounded-2xl p-8"
+          >
+            <div className="flex items-center space-x-3 mb-6">
+              <Zap className="w-8 h-8 text-yellow-400" />
+              <h2 className="text-2xl font-bold text-white">Solar Flares (7 Days)</h2>
             </div>
-          </div>
-        </motion.div>
+
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {solarFlares.length > 0 ? solarFlares.map((flare, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                  className="p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 hover:from-yellow-500/20 hover:to-orange-500/20 rounded-xl border border-yellow-500/20 transition-all"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      flare.classType?.startsWith('X') ? 'bg-red-500 text-white' :
+                      flare.classType?.startsWith('M') ? 'bg-orange-500 text-white' :
+                      flare.classType?.startsWith('C') ? 'bg-yellow-500 text-black' :
+                      'bg-gray-500 text-white'
+                    }`}>
+                      {flare.classType || 'Unknown Class'}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {flare.beginTime ? new Date(flare.beginTime).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-white mb-1">
+                    Peak: {flare.peakTime ? new Date(flare.peakTime).toLocaleTimeString() : 'N/A'}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Source: {flare.sourceLocation || 'Unknown'}
+                  </p>
+                </motion.div>
+              )) : (
+                <div className="text-center py-10">
+                  <Zap className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">No solar flares in the past 7 days</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* CMEs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="glass-card rounded-2xl p-8"
+          >
+            <div className="flex items-center space-x-3 mb-6">
+              <Radio className="w-8 h-8 text-purple-400" />
+              <h2 className="text-2xl font-bold text-white">CMEs (7 Days)</h2>
+            </div>
+
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {cmes.length > 0 ? cmes.map((cme, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 rounded-xl border border-purple-500/20 transition-all"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-bold text-purple-400">
+                      {cme.cmeAnalyses?.[0]?.speed ? `${cme.cmeAnalyses[0].speed} km/s` : 'Speed N/A'}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {cme.activityID || `CME #${index + 1}`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-white mb-1">
+                    {cme.startTime ? new Date(cme.startTime).toLocaleString() : 'Time N/A'}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Type: {cme.cmeAnalyses?.[0]?.type || 'Unknown'} •
+                    {cme.cmeAnalyses?.[0]?.isMostAccurate ? ' ✓ Verified' : ' Preliminary'}
+                  </p>
+                </motion.div>
+              )) : (
+                <div className="text-center py-10">
+                  <Radio className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">No CMEs detected in the past 7 days</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   )

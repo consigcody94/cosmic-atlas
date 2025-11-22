@@ -186,7 +186,7 @@ export default function ISSPage() {
           </motion.div>
         </div>
 
-        {/* Map Placeholder */}
+        {/* Live Map */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -194,15 +194,76 @@ export default function ISSPage() {
           className="glass-card rounded-2xl p-8 mt-8"
         >
           <h2 className="text-2xl font-bold text-white mb-6">Live Map</h2>
-          <div className="aspect-video bg-gradient-to-br from-blue-900/20 to-purple-900/20 rounded-xl flex items-center justify-center">
-            <div className="text-center">
-              <Satellite className="w-16 h-16 text-cosmic-blue mx-auto mb-4 animate-bounce" />
-              <p className="text-gray-400">
-                {position && `ISS is currently at ${position.latitude.toFixed(2)}°N, ${position.longitude.toFixed(2)}°E`}
-              </p>
-              <p className="text-sm text-gray-500 mt-2">Map visualization coming soon</p>
+          {position ? (
+            <div className="relative aspect-video bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-xl overflow-hidden border border-cosmic-blue/20">
+              {/* Simple CSS-based world map */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg viewBox="0 0 800 400" className="w-full h-full opacity-30">
+                  {/* Simplified world map outlines */}
+                  <path d="M 100 200 L 700 200" stroke="#3b82f6" strokeWidth="1" fill="none" />
+                  <path d="M 400 50 L 400 350" stroke="#3b82f6" strokeWidth="1" fill="none" />
+                  <circle cx="400" cy="200" r="180" stroke="#3b82f6" strokeWidth="1" fill="none" />
+                  <ellipse cx="400" cy="200" rx="180" ry="90" stroke="#3b82f6" strokeWidth="1" fill="none" />
+                  <ellipse cx="400" cy="200" rx="180" ry="45" stroke="#3b82f6" strokeWidth="1" fill="none" />
+                </svg>
+              </div>
+
+              {/* ISS Position Marker */}
+              <div
+                className="absolute w-8 h-8 -ml-4 -mt-4 transition-all duration-1000 ease-out"
+                style={{
+                  left: `${((position.longitude + 180) / 360) * 100}%`,
+                  top: `${((90 - position.latitude) / 180) * 100}%`
+                }}
+              >
+                <div className="relative">
+                  <Satellite className="w-8 h-8 text-cosmic-blue animate-pulse drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                  <div className="absolute inset-0 animate-ping">
+                    <div className="w-8 h-8 rounded-full bg-cosmic-blue/30"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Orbital Path */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                <ellipse
+                  cx="50%"
+                  cy="50%"
+                  rx="45%"
+                  ry="25%"
+                  stroke="rgba(59, 130, 246, 0.3)"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeDasharray="10 5"
+                />
+              </svg>
+
+              {/* Coordinate Display */}
+              <div className="absolute bottom-4 left-4 right-4 glass-card rounded-lg p-3 text-sm">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-gray-400">Position:</span>
+                    <span className="text-white font-mono ml-2">
+                      {position.latitude.toFixed(2)}°N, {position.longitude.toFixed(2)}°E
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-gray-400">Speed:</span>
+                    <span className="text-cosmic-blue font-mono ml-2">
+                      {(position.velocity * 3600).toFixed(0)} km/h
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="aspect-video bg-gradient-to-br from-blue-900/20 to-purple-900/20 rounded-xl flex items-center justify-center">
+              <div className="text-center">
+                <Satellite className="w-16 h-16 text-cosmic-blue mx-auto mb-4 animate-bounce" />
+                <p className="text-gray-400">Loading ISS position...</p>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
