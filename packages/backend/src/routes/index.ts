@@ -366,6 +366,35 @@ router.get('/space-weather/cmes', async (req, res) => {
   res.json(result);
 });
 
+router.get('/space-weather/summary', async (req, res) => {
+  const result = await spaceWeather.getSpaceWeatherSummary();
+  res.json(result);
+});
+
+// ============================================================================
+// ROUTE ALIASES (for frontend compatibility)
+// ============================================================================
+
+// APOD alias
+router.get('/apod', async (req, res) => {
+  const { date } = req.query;
+  const result = await nasa.getAPOD(date as string);
+  res.json(result);
+});
+
+// Mars rovers alias
+router.get('/mars/:rover', async (req, res) => {
+  const { rover } = req.params;
+  const { sol, earth_date, camera } = req.query;
+  const result = await nasa.getMarsPhotos(
+    rover,
+    sol ? parseInt(sol as string, 10) : undefined,
+    earth_date as string,
+    camera as string
+  );
+  res.json(result);
+});
+
 // ============================================================================
 // EXOPLANETS ROUTES
 // ============================================================================
