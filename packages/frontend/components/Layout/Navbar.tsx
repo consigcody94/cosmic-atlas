@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Satellite,
   Sun,
-  Rover,
+  Truck,
   Globe2,
   Rocket,
   Image as ImageIcon,
@@ -30,7 +30,7 @@ export default function Navbar() {
   const navLinks: NavLink[] = [
     { name: 'ISS Tracker', href: '/iss', icon: <Satellite className="w-4 h-4" /> },
     { name: 'Space Weather', href: '/space-weather', icon: <Sun className="w-4 h-4" /> },
-    { name: 'Mars Rovers', href: '/mars', icon: <Rover className="w-4 h-4" /> },
+    { name: 'Mars Rovers', href: '/mars', icon: <Truck className="w-4 h-4" /> },
     { name: 'Exoplanets', href: '/exoplanets', icon: <Globe2 className="w-4 h-4" /> },
     { name: 'Launches', href: '/launches', icon: <Rocket className="w-4 h-4" /> },
     { name: 'APOD', href: '/apod', icon: <ImageIcon className="w-4 h-4" /> },

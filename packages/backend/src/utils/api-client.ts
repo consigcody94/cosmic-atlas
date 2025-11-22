@@ -45,7 +45,7 @@ export class APIClient {
   /**
    * Make cached GET request
    */
-  protected async cachedGet<T>(
+  public async cachedGet<T>(
     url: string,
     config?: AxiosRequestConfig,
     cacheKey?: string,
@@ -104,7 +104,7 @@ export class APIClient {
   /**
    * Make uncached GET request (for real-time data)
    */
-  protected async get<T>(
+  public async get<T>(
     url: string,
     config?: AxiosRequestConfig
   ): Promise<APIResponse<T>> {

@@ -16,14 +16,3 @@ export {
   useSpaceWeather,
   useLaunchUpdates,
 } from './useWebSocket'
-
-export default {
-  useApi,
-  usePaginatedApi,
-  usePolling,
-  useDebouncedApi,
-  useWebSocket,
-  useISSPosition,
-  useSpaceWeather,
-  useLaunchUpdates,
-}

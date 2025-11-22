@@ -146,7 +146,7 @@ export class EarthClient extends APIClient {
     };
     cloud_score?: number;
   }>> {
-    const params: Record<string, string | number> = {
+    const params: Record<string, string | number | boolean> = {
       api_key: config.apiKeys.nasa,
       lat,
       lon,

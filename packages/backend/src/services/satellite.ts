@@ -152,7 +152,22 @@ export class SatelliteClient extends APIClient {
   }>> {
     if (!this.hasN2YOKey) {
       // Fallback to CelesTrak
-      return this.getCelesTrakTLE(noradId.toString());
+      const celestrakResult = await this.getCelesTrakTLE(noradId.toString());
+      if (!celestrakResult.success) {
+        return celestrakResult as any;
+      }
+      // Wrap the raw TLE string in the expected format
+      return {
+        success: true,
+        data: {
+          info: {
+            satname: `Satellite ${noradId}`,
+            satid: noradId,
+          },
+          tle: celestrakResult.data || '',
+        },
+        metadata: celestrakResult.metadata,
+      };
     }
 
     return this.cachedGet(

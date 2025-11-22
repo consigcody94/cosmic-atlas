@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import {
   Satellite,
   Sun,
-  Rover,
+  Truck,
   Globe2,
   Rocket,
   Image as ImageIcon,
@@ -58,7 +58,7 @@ export default function Home() {
     {
       title: 'Mars Rovers',
       description: 'Explore the latest images and data from NASA Mars rovers on the Red Planet',
-      icon: <Rover className="w-12 h-12" />,
+      icon: <Truck className="w-12 h-12" />,
       href: '/mars',
       color: 'from-red-500 to-orange-600',
       gradient: 'bg-gradient-to-br from-red-500/20 to-orange-600/20',
@@ -201,7 +201,7 @@ export default function Home() {
             animate="visible"
             className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
           >
-            {stats.map((stat, index) => (
+            {stats.map((stat) => (
               <motion.div
                 key={stat.label}
                 variants={itemVariants}
@@ -225,7 +225,7 @@ export default function Home() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {features.map((feature, index) => (
+            {features.map((feature) => (
               <motion.div key={feature.title} variants={itemVariants}>
                 <Link href={feature.href}>
                   <div className="glass-card feature-card rounded-2xl p-8 h-full transition-smooth cursor-pointer group">

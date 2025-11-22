@@ -46,25 +46,19 @@ router.get('/health', (req, res) => {
 // ============================================================================
 
 router.get('/nasa/apod', async (req, res) => {
-  const { date, start_date, end_date, count } = req.query;
-  const result = await nasa.getAPOD(
-    date as string,
-    start_date as string,
-    end_date as string,
-    count ? parseInt(count as string, 10) : undefined
-  );
+  const { date } = req.query;
+  const result = await nasa.getAPOD(date as string);
   res.json(result);
 });
 
 router.get('/nasa/mars/:rover', async (req, res) => {
   const { rover } = req.params;
-  const { sol, earth_date, camera, page } = req.query;
+  const { sol, earth_date, camera } = req.query;
   const result = await nasa.getMarsPhotos(
     rover,
     sol ? parseInt(sol as string, 10) : undefined,
     earth_date as string,
-    camera as string,
-    page ? parseInt(page as string, 10) : undefined
+    camera as string
   );
   res.json(result);
 });
@@ -99,8 +93,7 @@ router.get('/nasa/earth/imagery', async (req, res) => {
     parseFloat(lat as string),
     parseFloat(lon as string),
     date as string,
-    dim ? parseFloat(dim as string) : undefined,
-    cloud_score === 'true'
+    dim ? parseFloat(dim as string) : undefined
   );
   res.json(result);
 });
@@ -278,11 +271,10 @@ router.get('/spacex/capsules', async (req, res) => {
 // ============================================================================
 
 router.get('/launches/upcoming', async (req, res) => {
-  const { limit, offset, search } = req.query;
+  const { limit, offset } = req.query;
   const result = await launches.getUpcomingLaunches(
     limit ? parseInt(limit as string, 10) : 10,
-    offset ? parseInt(offset as string, 10) : 0,
-    search as string
+    offset ? parseInt(offset as string, 10) : 0
   );
   res.json(result);
 });
@@ -443,12 +435,11 @@ router.get('/solar-system/fireballs', async (req, res) => {
 // ============================================================================
 
 router.get('/earth/events', async (req, res) => {
-  const { category, status, days, limit } = req.query;
+  const { category, status, days } = req.query;
   const result = await earth.getNaturalEvents(
     category as string,
     status as string,
-    days ? parseInt(days as string, 10) : undefined,
-    limit ? parseInt(limit as string, 10) : undefined
+    days ? parseInt(days as string, 10) : undefined
   );
   res.json(result);
 });

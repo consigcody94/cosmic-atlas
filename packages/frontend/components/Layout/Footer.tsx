@@ -4,7 +4,7 @@ import Link from 'next/link'
 import {
   Satellite,
   Sun,
-  Rover,
+  Truck,
   Globe2,
   Rocket,
   Image as ImageIcon,
@@ -24,7 +24,7 @@ export default function Footer() {
       links: [
         { name: 'ISS Tracker', href: '/iss', icon: <Satellite className="w-4 h-4" /> },
         { name: 'Space Weather', href: '/space-weather', icon: <Sun className="w-4 h-4" /> },
-        { name: 'Mars Rovers', href: '/mars', icon: <Rover className="w-4 h-4" /> },
+        { name: 'Mars Rovers', href: '/mars', icon: <Truck className="w-4 h-4" /> },
         { name: 'Exoplanets', href: '/exoplanets', icon: <Globe2 className="w-4 h-4" /> },
         { name: 'Launches', href: '/launches', icon: <Rocket className="w-4 h-4" /> },
         { name: 'APOD Gallery', href: '/apod', icon: <ImageIcon className="w-4 h-4" /> },
@@ -98,23 +98,29 @@ export default function Footer() {
               <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.name}>
-                    {link.external ? (
+                    {'external' in link && link.external ? (
                       <a
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 text-gray-400 hover:text-cosmic-blue transition-colors duration-200 group"
                       >
-                        {link.icon && <span>{link.icon}</span>}
                         <span>{link.name}</span>
                         <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </a>
+                    ) : 'icon' in link ? (
+                      <Link
+                        href={link.href}
+                        className="flex items-center space-x-2 text-gray-400 hover:text-cosmic-blue transition-colors duration-200"
+                      >
+                        <span>{(link as any).icon}</span>
+                        <span>{link.name}</span>
+                      </Link>
                     ) : (
                       <Link
                         href={link.href}
                         className="flex items-center space-x-2 text-gray-400 hover:text-cosmic-blue transition-colors duration-200"
                       >
-                        {link.icon && <span>{link.icon}</span>}
                         <span>{link.name}</span>
                       </Link>
                     )}
