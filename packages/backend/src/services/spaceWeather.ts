@@ -17,19 +17,14 @@ export class SpaceWeatherClient extends APIClient {
   }
 
   /**
-   * Get aurora forecast for northern and southern hemispheres
-   * @returns Current aurora activity forecast
+   * Get aurora forecast based on geomagnetic activity
+   * @returns Current aurora activity estimate (hemispheric power in GW)
    */
-  async getAuroraForecast(): Promise<APIResponse<{
-    north: any;
-    south: any;
-  }>> {
-    const [north, south] = await Promise.all([
-      this.cachedGet('/products/aurora-forecast-northern-hemisphere.json', {}, 'aurora-north', config.cache.ttl.spaceWeather),
-      this.cachedGet('/products/aurora-forecast-southern-hemisphere.json', {}, 'aurora-south', config.cache.ttl.spaceWeather),
-    ]);
+  async getAuroraForecast(): Promise<APIResponse<{hemisphericPower: number}>> {
+    // Get Kp index to estimate aurora activity
+    const geomagData = await this.getGeomagneticActivity();
 
-    if (!north.success || !south.success) {
+    if (!geomagData.success) {
       return {
         success: false,
         error: {
@@ -44,46 +39,114 @@ export class SpaceWeatherClient extends APIClient {
       };
     }
 
+    // Estimate hemispheric power from Kp index
+    // Kp 0-1 ≈ 5-10 GW, Kp 2-3 ≈ 15-20 GW, Kp 4-5 ≈ 30-50 GW, Kp 6+ ≈ 80-150 GW
+    const kp = geomagData.data?.kp || 0;
+    const hemisphericPower = Math.round(5 + (kp * kp * 3)); // Quadratic relationship
+
     return {
       success: true,
       data: {
-        north: north.data,
-        south: south.data,
+        hemisphericPower,
       },
       metadata: {
         source: 'NOAA-SWPC',
         timestamp: Date.now(),
-        cached: false,
+        cached: geomagData.metadata?.cached || false,
       },
     };
   }
 
   /**
    * Get real-time solar wind data
-   * @returns Current solar wind speed, density, and magnetic field
+   * @returns Current solar wind speed, density, and temperature
    */
-  async getSolarWind(): Promise<APIResponse<any[]>> {
-    return this.cachedGet(
-      '/products/solar-wind/mag-1-day.json',
+  async getSolarWind(): Promise<APIResponse<{speed: number, density: number, temperature: number}>> {
+    const rawData = await this.cachedGet(
+      '/products/solar-wind/plasma-1-day.json',
       {},
       'solar-wind',
       config.cache.ttl.spaceWeather
     );
+
+    if (!rawData.success || !Array.isArray(rawData.data) || rawData.data.length < 2) {
+      return {
+        success: false,
+        error: {
+          code: 'SOLAR_WIND_ERROR',
+          message: 'Failed to parse solar wind data',
+        },
+        metadata: {
+          source: 'NOAA-SWPC',
+          timestamp: Date.now(),
+          cached: false,
+        },
+      };
+    }
+
+    // NOAA plasma data: [0]=headers, last row is latest data
+    // Columns: [0]=time_tag, [1]=density, [2]=speed, [3]=temperature
+    const latest = rawData.data[rawData.data.length - 1];
+
+    return {
+      success: true,
+      data: {
+        speed: parseFloat(latest[2]) || 0,
+        density: parseFloat(latest[1]) || 0,
+        temperature: parseFloat(latest[3]) || 0,
+      },
+      metadata: {
+        source: 'NOAA-SWPC',
+        timestamp: Date.now(),
+        cached: rawData.metadata?.cached || false,
+      },
+    };
   }
 
   /**
    * Get geomagnetic activity (Kp index)
    * Kp index: 0-9 scale of geomagnetic disturbance
    * 0-4: quiet, 5: minor storm, 6: moderate storm, 7: strong storm, 8-9: severe storm
-   * @returns Current and forecasted Kp index values
+   * @returns Current Kp index value
    */
-  async getGeomagneticActivity(): Promise<APIResponse<any[]>> {
-    return this.cachedGet(
+  async getGeomagneticActivity(): Promise<APIResponse<{kp: number}>> {
+    const rawData = await this.cachedGet(
       '/products/noaa-planetary-k-index.json',
       {},
       'kp-index',
       config.cache.ttl.spaceWeather
     );
+
+    if (!rawData.success || !Array.isArray(rawData.data) || rawData.data.length < 2) {
+      return {
+        success: false,
+        error: {
+          code: 'GEOMAGNETIC_ERROR',
+          message: 'Failed to parse geomagnetic data',
+        },
+        metadata: {
+          source: 'NOAA-SWPC',
+          timestamp: Date.now(),
+          cached: false,
+        },
+      };
+    }
+
+    // NOAA Kp data: [0]=headers, last row is latest data
+    // Columns: [0]=time_tag, [1]=Kp, [2]=a_running, [3]=station_count
+    const latest = rawData.data[rawData.data.length - 1];
+
+    return {
+      success: true,
+      data: {
+        kp: parseFloat(latest[1]) || 0,
+      },
+      metadata: {
+        source: 'NOAA-SWPC',
+        timestamp: Date.now(),
+        cached: rawData.metadata?.cached || false,
+      },
+    };
   }
 
   /**
